@@ -1,15 +1,27 @@
 # Copilot plugin for Claude Code
 
-Use GitHub Copilot from inside Claude Code for code reviews, delegated tasks, and resumable background runs.
+Use GitHub Copilot from inside Claude Code for code reviews, delegated tasks, model selection, and resumable background runs.
 
-This project is a Claude Code companion plugin modeled after `openai/codex-plugin-cc`, but wired to the GitHub Copilot CLI instead of Codex.
+I liked OpenAI's `codex-plugin-cc`, and I use Claude Code, Codex, and Copilot regularly. I wanted the same kind of Copilot workflow inside Claude Code too, so I built this.
+
+This project is an open-source Claude Code companion plugin inspired by `openai/codex-plugin-cc`, but wired to the GitHub Copilot CLI instead of Codex.
+
+## Why this exists
+
+I did not want Copilot to be the odd one out in my workflow.
+
+- Claude Code is where I like to work.
+- Codex already had a good plugin story.
+- I still wanted to call Copilot for reviews, rescue tasks, and model-specific runs without leaving CC.
+
+This plugin is the bridge for that.
 
 ## What you get
 
 - `/copilot:setup` to check local Copilot CLI readiness and show the configured default model
 - `/copilot:review` for a structured read-only review of your current git changes
 - `/copilot:adversarial-review` for a more challenging review focused on risks and design tradeoffs
-- `/copilot:rescue` to hand a coding task to Copilot, optionally with `--model` and `--effort`
+- `/copilot:rescue` to hand a coding task to Copilot, optionally with `--model`, `--effort`, or `--reasoning-effort`
 - `/copilot:status`, `/copilot:result`, and `/copilot:cancel` for background-job management
 
 ## Requirements

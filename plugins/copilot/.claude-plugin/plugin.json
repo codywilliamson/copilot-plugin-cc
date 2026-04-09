@@ -1,7 +1,7 @@
 {
   "name": "copilot",
   "version": "0.1.0",
-  "description": "Use GitHub Copilot from Claude Code to review code or delegate tasks.",
+  "description": "Run GitHub Copilot from Claude Code for reviews, rescue tasks, and model-specific runs.",
   "author": {
     "name": "Cody Williamson"
   }

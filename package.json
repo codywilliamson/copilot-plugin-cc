@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Use GitHub Copilot from Claude Code to review code and delegate tasks.",
+  "description": "A Claude Code plugin for GitHub Copilot, built to bring codex-plugin-cc-style workflows to Copilot too.",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=18.18.0"
