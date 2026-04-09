@@ -122,6 +122,27 @@ test("task can resume the latest Copilot session", () => {
   assert.match(second.stdout, /Resumed the previous Copilot session/);
 });
 
+test("task accepts --reasoning-effort as a Copilot-style alias", () => {
+  const repo = makeTempDir();
+  const binDir = makeTempDir();
+  const homeDir = makeTempDir();
+  installFakeCopilot(binDir, "ok");
+  installFakeGh(binDir);
+  writeCopilotConfig(homeDir, { model: "gpt-5.4" });
+  initGitRepo(repo);
+  fs.writeFileSync(path.join(repo, "README.md"), "hello\n");
+  run("git", ["add", "README.md"], { cwd: repo });
+  run("git", ["commit", "-m", "init"], { cwd: repo });
+
+  const result = run("node", [SCRIPT, "task", "--reasoning-effort", "xhigh", "ship it"], {
+    cwd: repo,
+    env: buildEnv({ binDir, homeDir })
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /Handled the requested task/);
+});
+
 test("cancel stops a running task", async () => {
   const repo = makeTempDir();
   const binDir = makeTempDir();

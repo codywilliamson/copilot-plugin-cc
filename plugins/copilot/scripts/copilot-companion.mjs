@@ -54,7 +54,7 @@ function printUsage() {
       "  node scripts/copilot-companion.mjs setup [--config-dir <dir>] [--json]",
       "  node scripts/copilot-companion.mjs review [--base <ref>] [--scope <auto|working-tree|branch>] [--model <model>] [--json]",
       "  node scripts/copilot-companion.mjs adversarial-review [--base <ref>] [--scope <auto|working-tree|branch>] [--model <model>] [focus text] [--json]",
-      "  node scripts/copilot-companion.mjs task [--resume|--resume-last|--fresh] [--model <model>] [--effort <low|medium|high|xhigh>] [prompt]",
+      "  node scripts/copilot-companion.mjs task [--resume|--resume-last|--fresh] [--model <model>] [--effort <low|medium|high|xhigh>] [--reasoning-effort <low|medium|high|xhigh>] [prompt]",
       "  node scripts/copilot-companion.mjs status [job-id] [--all] [--wait] [--json]",
       "  node scripts/copilot-companion.mjs result [job-id] [--json]",
       "  node scripts/copilot-companion.mjs cancel [job-id] [--json]"
@@ -590,14 +590,14 @@ async function handleReview(argv) {
 
 async function handleTask(argv) {
   const { options, positionals } = parseCommandInput(argv, {
-    valueOptions: ["model", "effort", "cwd", "prompt-file"],
+    valueOptions: ["model", "effort", "reasoning-effort", "cwd", "prompt-file"],
     booleanOptions: ["json", "resume-last", "resume", "fresh", "background", "write"]
   });
 
   const cwd = resolveCommandCwd(options);
   const workspaceRoot = resolveCommandWorkspace(options);
   const model = normalizeRequestedModel(options.model);
-  const effort = normalizeReasoningEffort(options.effort);
+  const effort = normalizeReasoningEffort(options.effort ?? options["reasoning-effort"]);
   const prompt = readTaskPrompt(cwd, options, positionals);
 
   const resumeLast = Boolean(options["resume-last"] || options.resume);

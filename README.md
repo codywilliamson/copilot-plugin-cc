@@ -92,6 +92,7 @@ Delegate a coding task to Copilot. This command is write-capable by default and 
 ```bash
 /copilot:rescue investigate why the tests started failing
 /copilot:rescue --model gpt-5.4 --effort high fix the flaky integration test
+/copilot:rescue --model gpt-5.4 --reasoning-effort xhigh plan a safe migration for this schema change
 /copilot:rescue --resume apply the smallest safe fix from the last run
 /copilot:rescue --background refactor this module into smaller pieces
 ```
@@ -99,7 +100,7 @@ Delegate a coding task to Copilot. This command is write-capable by default and 
 Notes:
 
 - `--model <id>` is passed through to Copilot CLI.
-- `--effort <low|medium|high|xhigh>` is passed through when supported by the selected model.
+- `--effort <low|medium|high|xhigh>` and `--reasoning-effort <low|medium|high|xhigh>` are both accepted and forwarded to Copilot.
 - If you omit `--model`, Copilot CLI uses its configured default model from `~/.copilot/config.json`.
 
 ### `/copilot:status`
