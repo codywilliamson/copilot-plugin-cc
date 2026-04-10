@@ -12,6 +12,7 @@ import { collectReviewContext, ensureGitRepository, resolveReviewTarget } from "
 import {
   buildSingleJobSnapshot,
   buildStatusSnapshot,
+  filterJobsForCurrentSession,
   readStoredJob,
   resolveCancelableJob,
   resolveResultJob,
@@ -36,8 +37,7 @@ import {
   createJobRecord,
   createProgressReporter,
   nowIso,
-  runTrackedJob,
-  SESSION_ID_ENV
+  runTrackedJob
 } from "./lib/tracked-jobs.mjs";
 import { resolveWorkspaceRoot } from "./lib/workspace.mjs";
 
@@ -317,18 +317,6 @@ function buildTaskRunMetadata({ prompt, resumeLast = false }) {
   };
 }
 
-function getCurrentClaudeSessionId() {
-  return process.env[SESSION_ID_ENV] ?? null;
-}
-
-function filterJobsForCurrentClaudeSession(jobs) {
-  const sessionId = getCurrentClaudeSessionId();
-  if (!sessionId) {
-    return jobs;
-  }
-  return jobs.filter((job) => job.sessionId === sessionId);
-}
-
 function findLatestResumableTaskJob(jobs) {
   return (
     jobs.find(
@@ -344,7 +332,7 @@ function findLatestResumableTaskJob(jobs) {
 async function resolveLatestTrackedTaskSession(cwd, options = {}) {
   const workspaceRoot = resolveWorkspaceRoot(cwd);
   const jobs = sortJobsNewestFirst(listJobs(workspaceRoot)).filter((job) => job.id !== options.excludeJobId);
-  const visibleJobs = filterJobsForCurrentClaudeSession(jobs);
+  const visibleJobs = filterJobsForCurrentSession(jobs);
   const activeTask = visibleJobs.find((job) => job.jobClass === "task" && (job.status === "queued" || job.status === "running"));
   if (activeTask) {
     throw new Error(`Task ${activeTask.id} is still running. Use /copilot:status before continuing it.`);
