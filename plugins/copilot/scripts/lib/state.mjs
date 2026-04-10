@@ -172,6 +172,14 @@ export function readJobFile(jobFile) {
   return JSON.parse(fs.readFileSync(jobFile, "utf8"));
 }
 
+export function readStoredJob(workspaceRoot, jobId) {
+  const jobFile = resolveJobFile(workspaceRoot, jobId);
+  if (!fs.existsSync(jobFile)) {
+    return null;
+  }
+  return readJobFile(jobFile);
+}
+
 function removeJobFile(jobFile) {
   if (fs.existsSync(jobFile)) {
     fs.unlinkSync(jobFile);
