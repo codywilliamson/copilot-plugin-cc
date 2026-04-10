@@ -5,13 +5,7 @@ import readline from "node:readline";
 import { spawn, spawnSync } from "node:child_process";
 
 import { binaryAvailable } from "./process.mjs";
-
-function firstMeaningfulLine(text) {
-  return String(text ?? "")
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .find(Boolean) ?? "";
-}
+import { firstMeaningfulLine } from "./text.mjs";
 
 function normalizeReasoningText(text) {
   return String(text ?? "").replace(/\s+/g, " ").trim();
