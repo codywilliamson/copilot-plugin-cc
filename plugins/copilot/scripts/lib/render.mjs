@@ -350,32 +350,30 @@ export function renderJobStatusReport(job) {
   return `${lines.join("\n").trimEnd()}\n`;
 }
 
+function ensureTrailingNewline(text) {
+  return text.endsWith("\n") ? text : `${text}\n`;
+}
+
+function appendSessionInfo(output, sessionId) {
+  const base = ensureTrailingNewline(output);
+  if (!sessionId) return base;
+  return `${base}\nCopilot session ID: ${sessionId}\nResume in Copilot: copilot --resume ${sessionId}\n`;
+}
+
 export function renderStoredJobResult(job, storedJob) {
   const sessionId = storedJob?.sessionId ?? job.sessionId ?? null;
-  const resumeCommand = sessionId ? `copilot --resume ${sessionId}` : null;
+
   if (isStructuredReviewStoredResult(storedJob) && storedJob?.rendered) {
-    const output = storedJob.rendered.endsWith("\n") ? storedJob.rendered : `${storedJob.rendered}\n`;
-    if (!sessionId) {
-      return output;
-    }
-    return `${output}\nCopilot session ID: ${sessionId}\nResume in Copilot: ${resumeCommand}\n`;
+    return appendSessionInfo(storedJob.rendered, sessionId);
   }
 
   const rawOutput = (typeof storedJob?.result?.rawOutput === "string" && storedJob.result.rawOutput) || "";
   if (rawOutput) {
-    const output = rawOutput.endsWith("\n") ? rawOutput : `${rawOutput}\n`;
-    if (!sessionId) {
-      return output;
-    }
-    return `${output}\nCopilot session ID: ${sessionId}\nResume in Copilot: ${resumeCommand}\n`;
+    return appendSessionInfo(rawOutput, sessionId);
   }
 
   if (storedJob?.rendered) {
-    const output = storedJob.rendered.endsWith("\n") ? storedJob.rendered : `${storedJob.rendered}\n`;
-    if (!sessionId) {
-      return output;
-    }
-    return `${output}\nCopilot session ID: ${sessionId}\nResume in Copilot: ${resumeCommand}\n`;
+    return appendSessionInfo(storedJob.rendered, sessionId);
   }
 
   const lines = [
@@ -387,7 +385,7 @@ export function renderStoredJobResult(job, storedJob) {
 
   if (sessionId) {
     lines.push(`Copilot session ID: ${sessionId}`);
-    lines.push(`Resume in Copilot: ${resumeCommand}`);
+    lines.push(`Resume in Copilot: copilot --resume ${sessionId}`);
   }
 
   if (job.summary) {

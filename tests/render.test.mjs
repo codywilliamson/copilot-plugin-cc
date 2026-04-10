@@ -56,3 +56,13 @@ test("renderStoredJobResult includes resume instructions for Copilot sessions", 
   assert.match(output, /Copilot session ID: sess-123/);
   assert.match(output, /Resume in Copilot: copilot --resume sess-123/);
 });
+
+test("renderStoredJobResult omits session info when no session exists", () => {
+  const output = renderStoredJobResult(
+    { id: "task-1", status: "completed", title: "Copilot Task" },
+    { rendered: "Task output here.\n" }
+  );
+  assert.ok(!output.includes("Copilot session ID:"));
+  assert.ok(!output.includes("Resume in Copilot:"));
+  assert.match(output, /Task output here\./);
+});
