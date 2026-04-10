@@ -4,7 +4,7 @@ Use GitHub Copilot from inside Claude Code for code reviews, delegated tasks, mo
 
 I liked OpenAI's `codex-plugin-cc`, and I use Claude Code, Codex, and Copilot regularly. I wanted the same kind of Copilot workflow inside Claude Code too, so I built this.
 
-This project is an open-source Claude Code companion plugin inspired by `openai/codex-plugin-cc`, but wired to the GitHub Copilot CLI instead of Codex.
+This project is an open-source Claude Code companion plugin inspired by [`openai/codex-plugin-cc`](https://github.com/openai/codex-plugin-cc), but wired to the GitHub Copilot CLI instead of Codex.
 
 ## Why this exists
 
