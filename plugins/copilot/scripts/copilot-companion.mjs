@@ -28,7 +28,7 @@ import {
   renderStoredJobResult,
   renderTaskResult
 } from "./lib/render.mjs";
-import { generateJobId, listJobs } from "./lib/state.mjs";
+import { generateJobId, listJobs, upsertJob, writeJobFile } from "./lib/state.mjs";
 import { firstMeaningfulLine, parseStructuredOutput, shorten } from "./lib/text.mjs";
 import {
   appendLogLine,
@@ -637,7 +637,6 @@ async function handleCancel(argv) {
     errorMessage: "Cancelled by user."
   };
 
-  const { writeJobFile, upsertJob } = await import("./lib/state.mjs");
   writeJobFile(workspaceRoot, job.id, {
     ...existing,
     ...nextJob,
