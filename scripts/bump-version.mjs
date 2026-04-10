@@ -4,6 +4,7 @@ import path from "node:path";
 import process from "node:process";
 
 const VERSION_PATTERN = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
+const BUMP_LEVELS = ['major', 'minor', 'patch'];
 
 const TARGETS = [
   {
@@ -76,11 +77,13 @@ function usage() {
   return [
     "Usage:",
     "  node scripts/bump-version.mjs <version>",
+    "  node scripts/bump-version.mjs --release <major|minor|patch>",
     "  node scripts/bump-version.mjs --check [version]",
     "",
     "Options:",
-    "  --check       Verify manifest versions. Uses package.json when version is omitted.",
-    "  --root <dir>  Run against a different repository root.",
+    "  --release    Bump version, commit, tag, and push.",
+    "  --check      Verify manifest versions. Uses package.json when version is omitted.",
+    "  --root <dir> Run against a different repository root.",
     "  --help       Print this help."
   ].join("\n");
 }
@@ -88,6 +91,7 @@ function usage() {
 function parseArgs(argv) {
   const options = {
     check: false,
+    release: false,
     root: process.cwd(),
     version: null
   };
@@ -97,6 +101,8 @@ function parseArgs(argv) {
 
     if (arg === "--check") {
       options.check = true;
+    } else if (arg === "--release") {
+      options.release = true;
     } else if (arg === "--root") {
       const root = argv[i + 1];
       if (!root) {
@@ -123,6 +129,22 @@ function validateVersion(version) {
   if (!VERSION_PATTERN.test(version)) {
     throw new Error(`Expected a semver-like version such as 1.0.3, got: ${version}`);
   }
+}
+
+function parseSemver(version) {
+  const match = version.match(/^(\d+)\.(\d+)\.(\d+)/);
+  if (!match) throw new Error(`Cannot parse semver: ${version}`);
+  return { major: Number(match[1]), minor: Number(match[2]), patch: Number(match[3]) };
+}
+
+function bumpSemver(current, level) {
+  if (!BUMP_LEVELS.includes(level)) {
+    throw new Error(`Invalid bump level: ${level}. Use: ${BUMP_LEVELS.join(', ')}`);
+  }
+  const parts = parseSemver(current);
+  if (level === 'major') return `${parts.major + 1}.0.0`;
+  if (level === 'minor') return `${parts.major}.${parts.minor + 1}.0`;
+  return `${parts.major}.${parts.minor}.${parts.patch + 1}`;
 }
 
 function requireObject(value, label) {
@@ -192,7 +214,32 @@ function bumpVersion(root, version) {
   return changedFiles;
 }
 
-function main() {
+async function release(root, level) {
+  const { execSync } = await import("node:child_process");
+  const run = (cmd) => execSync(cmd, { stdio: "inherit", cwd: root });
+
+  const currentVersion = readPackageVersion(root);
+  const newVersion = bumpSemver(currentVersion, level);
+
+  const changedFiles = bumpVersion(root, newVersion);
+  const touched = changedFiles.length > 0 ? changedFiles.join(", ") : "no files changed";
+  console.log(`Bumped version to ${newVersion}: ${touched}.`);
+
+  const filesToStage = [
+    "package.json",
+    "package-lock.json",
+    "plugins/copilot/.claude-plugin/plugin.json",
+    ".claude-plugin/marketplace.json"
+  ];
+  run(`git add ${filesToStage.join(" ")}`);
+  run(`git commit -m "chore: release v${newVersion}"`);
+  run(`git tag v${newVersion}`);
+  run(`git push && git push --tags`);
+
+  console.log(`Released v${newVersion}.`);
+}
+
+async function main() {
   const options = parseArgs(process.argv.slice(2));
   if (options.help) {
     console.log(usage());
@@ -204,6 +251,15 @@ function main() {
     throw new Error(`Missing version.\n\n${usage()}`);
   }
   validateVersion(version);
+
+  if (options.release) {
+    const level = options.version;
+    if (!level || !BUMP_LEVELS.includes(level)) {
+      throw new Error(`--release requires a bump level: ${BUMP_LEVELS.join(', ')}\n\n${usage()}`);
+    }
+    await release(options.root, level);
+    return;
+  }
 
   if (options.check) {
     const mismatches = checkVersions(options.root, version);
@@ -219,9 +275,7 @@ function main() {
   console.log(`Set version metadata to ${version}: ${touched}.`);
 }
 
-try {
-  main();
-} catch (error) {
+main().catch((error) => {
   console.error(error instanceof Error ? error.message : String(error));
   process.exitCode = 1;
-}
+});
