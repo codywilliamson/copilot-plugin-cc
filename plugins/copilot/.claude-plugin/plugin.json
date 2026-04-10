@@ -1,6 +1,6 @@
 {
   "name": "copilot",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Run GitHub Copilot from Claude Code for reviews, rescue tasks, and model-specific runs.",
   "author": {
     "name": "Cody Williamson"
