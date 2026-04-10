@@ -246,12 +246,6 @@ async function main() {
     return;
   }
 
-  const version = options.version ?? (options.check ? readPackageVersion(options.root) : null);
-  if (!version) {
-    throw new Error(`Missing version.\n\n${usage()}`);
-  }
-  validateVersion(version);
-
   if (options.release) {
     const level = options.version;
     if (!level || !BUMP_LEVELS.includes(level)) {
@@ -260,6 +254,12 @@ async function main() {
     await release(options.root, level);
     return;
   }
+
+  const version = options.version ?? (options.check ? readPackageVersion(options.root) : null);
+  if (!version) {
+    throw new Error(`Missing version.\n\n${usage()}`);
+  }
+  validateVersion(version);
 
   if (options.check) {
     const mismatches = checkVersions(options.root, version);
