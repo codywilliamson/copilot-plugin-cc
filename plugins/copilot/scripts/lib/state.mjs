@@ -12,7 +12,7 @@ const STATE_FILE_NAME = "state.json";
 const JOBS_DIR_NAME = "jobs";
 const MAX_JOBS = 50;
 
-function nowIso() {
+export function nowIso() {
   return new Date().toISOString();
 }
 

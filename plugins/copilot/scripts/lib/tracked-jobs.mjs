@@ -1,13 +1,11 @@
 import fs from "node:fs";
 import process from "node:process";
 
-import { readJobFile, resolveJobFile, resolveJobLogFile, upsertJob, writeJobFile } from "./state.mjs";
+import { nowIso, readJobFile, resolveJobFile, resolveJobLogFile, upsertJob, writeJobFile } from "./state.mjs";
+
+export { nowIso } from "./state.mjs";
 
 export const SESSION_ID_ENV = "COPILOT_COMPANION_SESSION_ID";
-
-export function nowIso() {
-  return new Date().toISOString();
-}
 
 function normalizeProgressEvent(value) {
   if (value && typeof value === "object" && !Array.isArray(value)) {
