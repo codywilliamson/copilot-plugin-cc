@@ -5,13 +5,13 @@
   },
   "metadata": {
     "description": "Claude Code companion plugins for bringing codex-plugin-cc-style GitHub Copilot workflows into Claude Code.",
-    "version": "0.2.0"
+    "version": "0.2.1"
   },
   "plugins": [
     {
       "name": "copilot",
       "description": "Use GitHub Copilot from Claude Code for reviews, rescue tasks, background runs, and model selection.",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "author": {
         "name": "Cody Williamson"
       },
