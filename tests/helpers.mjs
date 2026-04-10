@@ -10,6 +10,12 @@ export function makeTempDir(prefix = "copilot-plugin-test-") {
 
 export function writeExecutable(filePath, source) {
   fs.writeFileSync(filePath, source, { encoding: "utf8", mode: 0o755 });
+  if (process.platform === "win32") {
+    // on windows, write a .cmd shim for shell-based lookups (spawnSync with shell: true)
+    fs.writeFileSync(`${filePath}.cmd`, `@node "%~dp0${path.basename(filePath)}" %*\r\n`);
+    // also write a .cjs copy that node can spawn directly (avoids shell arg mangling)
+    fs.writeFileSync(`${filePath}.cjs`, source, { encoding: "utf8" });
+  }
 }
 
 export function run(command, args, options = {}) {

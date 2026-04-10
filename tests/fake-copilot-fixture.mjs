@@ -34,7 +34,7 @@ export function buildEnv({ binDir, homeDir, pluginDataDir = null, extraEnv = {} 
   return {
     ...process.env,
     HOME: homeDir,
-    PATH: `${binDir}:${process.env.PATH}`,
+    PATH: `${binDir}${path.delimiter}${process.env.PATH}`,
     ...(pluginDataDir ? { CLAUDE_PLUGIN_DATA: pluginDataDir } : {}),
     ...extraEnv
   };

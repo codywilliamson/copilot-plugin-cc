@@ -9,7 +9,7 @@ export function runCommand(command, args = [], options = {}) {
     input: options.input,
     maxBuffer: options.maxBuffer,
     stdio: options.stdio ?? "pipe",
-    shell: process.platform === "win32" ? (process.env.SHELL || true) : false,
+    shell: process.platform === "win32",
     windowsHide: true
   });
 
@@ -94,7 +94,16 @@ export function terminateProcessTree(pid, options = {}) {
       throw result.error;
     }
 
-    throw new Error(formatCommandFailure(result));
+    // taskkill /T can fail on certain process trees — fall back to process.kill
+    try {
+      killImpl(pid);
+      return { attempted: true, delivered: true, method: "kill", result };
+    } catch (killError) {
+      if (killError?.code === "ESRCH") {
+        return { attempted: true, delivered: false, method: "kill", result };
+      }
+      throw new Error(formatCommandFailure(result));
+    }
   }
 
   try {

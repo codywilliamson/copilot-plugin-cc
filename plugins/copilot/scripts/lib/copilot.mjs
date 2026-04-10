@@ -1,11 +1,41 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import process from "node:process";
 import readline from "node:readline";
 import { spawn, spawnSync } from "node:child_process";
 
 import { binaryAvailable } from "./process.mjs";
 import { firstMeaningfulLine } from "./text.mjs";
+
+// on windows, find the full path to a command so we can spawn without shell.
+// shell: true would cause cmd.exe to split multi-word arguments.
+// for .exe binaries, the resolved path works directly.
+// for .cmd wrappers (e.g. npm-installed CLIs), we look for a node script
+// alongside the .cmd that we can run directly via process.execPath.
+function resolveCommandWin32(command, env) {
+  const result = spawnSync("where", [command], {
+    encoding: "utf8",
+    env,
+    windowsHide: true
+  });
+  if (result.status !== 0) return command;
+  const lines = result.stdout.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  // prefer .exe over .cmd
+  const exe = lines.find((l) => l.endsWith(".exe"));
+  if (exe) return exe;
+  // for .cmd, check if there's a node script alongside (extensionless or .mjs)
+  const cmd = lines.find((l) => l.endsWith(".cmd"));
+  if (cmd) {
+    const base = cmd.slice(0, -4);
+    for (const ext of [".cjs", ""]) {
+      const script = base + ext;
+      if (fs.existsSync(script)) return script;
+    }
+  }
+  return lines[0] || command;
+}
+
 
 function normalizeReasoningText(text) {
   return String(text ?? "").replace(/\s+/g, " ").trim();
@@ -143,7 +173,19 @@ function buildToolCompleteMessage(data) {
 
 export async function runCopilotJson(cwd, args, options = {}) {
   const env = options.env ?? process.env;
-  const child = spawn("copilot", args, {
+  let spawnCmd = "copilot";
+  let spawnArgs = args;
+  if (process.platform === "win32") {
+    const resolved = resolveCommandWin32("copilot", env);
+    if (resolved.endsWith(".exe")) {
+      spawnCmd = resolved;
+    } else {
+      // node script (.mjs or extensionless) — run through node
+      spawnCmd = process.execPath;
+      spawnArgs = [resolved, ...args];
+    }
+  }
+  const child = spawn(spawnCmd, spawnArgs, {
     cwd,
     env,
     stdio: ["ignore", "pipe", "pipe"],
